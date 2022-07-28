@@ -8,14 +8,14 @@ public class Main {
     static final String db_url = "jdbc:mysql://localhost:3306/todolist";
     static final String user = "root";
     static final String pass = "Italy2016-!";
-    static final String insert = "INSERT INTO `todolist`.`tasks` (`id`, `name`, `status`) VALUES (";
+    static final String insert = "INSERT INTO `todolist`.`tasks` (`id`, `name`, `status`) VALUES ";
     static final String select = "SELECT * FROM tasks";
     static final String select_opt = "SELECT * FROM tasks WHERE `id` = ";
-    static final String delete = "DELETE FROM `todolist`.`tasks` WHERE ";
+    static final String delete = "DELETE FROM `todolist`.`tasks` WHERE id = ";
     static final String update = "UPDATE `todolist`.`tasks` SET `id` = %1$s, `name` = '%2$s', `status` = '%3$s' " +
             "WHERE `id` = %1$s";
 
-    enum Commands{
+    enum Commands {
         status0,
         status1,
         error1,
@@ -30,51 +30,34 @@ public class Main {
         request4
     }
 
-    static String comm_desc(Commands command){
-        switch (command){
-
-            case status0:
-                return "Не выполнено";
-
-            case status1:
-                return "Выполнено";
-
-            case error1:
-                return "Неверный id";
-
-            case error2:
-                return "Непредвиденная ошибка";
-
-            case error3:
-                return "Неправильный код команды";
-
-            case functions_desc:
-                return "Добавить - 1\nУдалить - 2\nПосмотреть полный список - 3\nИзменить статус - 4\n" +
-                        "Остановить - 5";
-
-            case request1:
-                return "Введите задание";
-
-            case request2:
-                return "Введите id задания, которое вы хотите удалить";
-
-            case request4:
-                return "Введите id задания, статус которого вы хотите изменить";
-
-            default:
-                return "Нет такой команды";
-
-        }
+    static String comm_desc(Commands command) {
+        return switch (command) {
+            case status0 -> "Не выполнено";
+            case status1 -> "Выполнено";
+            case error1 -> "Неверный id";
+            case error2 -> "Непредвиденная ошибка";
+            case error3 -> "Неправильный код команды";
+            case functions_desc -> """
+                    Добавить - 1
+                    Удалить - 2
+                    Посмотреть полный список - 3
+                    Изменить статус - 4
+                    Остановить - 5""";
+            case request1 -> "Введите задание";
+            case request2 -> "Введите id задания, которое вы хотите удалить";
+            case request4 -> "Введите id задания, статус которого вы хотите изменить";
+            default -> "Нет такой команды";
+        };
     }
 
-    static Task create_task(String name, String status){
+    static Task create_task(String name, String status) {
         Task task = new Task();
         task.setName(name);
         task.setStatus(status);
         return task;
     }
 
-    static void tasks_display(ResultSet resultSet){
+    static void tasks_display(ResultSet resultSet) {
         System.out.println("id - name - status");
 
         try {
@@ -89,7 +72,7 @@ public class Main {
         }
     }
 
-    static Task change_status(ResultSet resultSet){
+    static Task change_status(ResultSet resultSet) {
         String name = "", status = "";
         try {
             if (resultSet.next()) {
@@ -130,9 +113,9 @@ public class Main {
                             Task task = create_task(sc.nextLine(), comm_desc(Commands.status0));
                             res_set.last();
                             int next_id = res_set.getInt(String.valueOf(Commands.id)) + 1;
-                            stmt.executeUpdate(insert + next_id + ", " + String.format("'%s'", task.getName()) + ", " +
-                                    String.format("'%s'", task.getStatus()) + ")");
-                        } catch (Exception e){
+                            stmt.executeUpdate(insert + String.format("(%1$s, '%2$s', '%3$s')", next_id,
+                                    task.getName(), task.getStatus()));
+                        } catch (Exception e) {
                             System.out.println(comm_desc(Commands.error2));
                         }
                         break;
@@ -141,7 +124,7 @@ public class Main {
                         // deletes the task by number
                         System.out.println(comm_desc(Commands.request2));
                         try {
-                            stmt.executeUpdate(delete + " id = " + Integer.parseInt(sc.nextLine()));
+                            stmt.executeUpdate(delete + Integer.parseInt(sc.nextLine()));
                         } catch (Exception e) {
                             System.out.println(comm_desc(Commands.error1));
                         }
