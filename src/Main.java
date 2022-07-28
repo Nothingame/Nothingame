@@ -21,7 +21,13 @@ public class Main {
         error1,
         error2,
         error3,
-        functions_desc
+        functions_desc,
+        id,
+        name,
+        status,
+        request1,
+        request2,
+        request4
     }
 
     static String comm_desc(Commands command){
@@ -46,6 +52,15 @@ public class Main {
                 return "Добавить - 1\nУдалить - 2\nПосмотреть полный список - 3\nИзменить статус - 4\n" +
                         "Остановить - 5";
 
+            case request1:
+                return "Введите задание";
+
+            case request2:
+                return "Введите id задания, которое вы хотите удалить";
+
+            case request4:
+                return "Введите id задания, статус которого вы хотите изменить";
+
             default:
                 return "Нет такой команды";
 
@@ -64,9 +79,9 @@ public class Main {
 
         try {
             while (resultSet.next()) {
-                String id = resultSet.getString("id");
-                String name = resultSet.getString("name");
-                String status = resultSet.getString("status");
+                String id = resultSet.getString(String.valueOf(Commands.id));
+                String name = resultSet.getString(String.valueOf(Commands.name));
+                String status = resultSet.getString(String.valueOf(Commands.status));
                 System.out.printf("%1$s - %2$s - %3$s%n", id, name, status);
             }
         } catch (Exception e) {
@@ -78,8 +93,8 @@ public class Main {
         String name = "", status = "";
         try {
             if (resultSet.next()) {
-                name = resultSet.getString("name");
-                status = resultSet.getString("status");
+                name = resultSet.getString(String.valueOf(Commands.name));
+                status = resultSet.getString(String.valueOf(Commands.status));
             }
         } catch (Exception e) {
             System.out.println(comm_desc(Commands.error2));
@@ -111,10 +126,10 @@ public class Main {
 
                     case 1:
                         try {
-                            System.out.println("Введите задание");
+                            System.out.println(comm_desc(Commands.request1));
                             Task task = create_task(sc.nextLine(), comm_desc(Commands.status0));
                             res_set.last();
-                            int next_id = res_set.getInt("id") + 1;
+                            int next_id = res_set.getInt(String.valueOf(Commands.id)) + 1;
                             stmt.executeUpdate(insert + next_id + ", " + String.format("'%s'", task.getName()) + ", " +
                                     String.format("'%s'", task.getStatus()) + ")");
                         } catch (Exception e){
@@ -124,7 +139,7 @@ public class Main {
 
                     case 2:
                         // deletes the task by number
-                        System.out.println("Введите id задания, которое вы хотите удалить");
+                        System.out.println(comm_desc(Commands.request2));
                         try {
                             stmt.executeUpdate(delete + " id = " + Integer.parseInt(sc.nextLine()));
                         } catch (Exception e) {
@@ -139,7 +154,7 @@ public class Main {
 
                     case 4:
                         try {
-                            System.out.println("Введите id задания, статус которого вы хотите изменить");
+                            System.out.println(comm_desc(Commands.request4));
                             int num = Integer.parseInt(sc.nextLine());
                             ResultSet rs_opt = stmt.executeQuery(select_opt + num);
                             Task task = change_status(rs_opt);
